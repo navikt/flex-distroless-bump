@@ -1,0 +1,46 @@
+#!/bin/bash
+
+usage() {
+  echo "Usage: $0 [java|node]"
+}
+
+# A parameter is required.
+if [[ -z $1 ]]; then
+  usage
+  exit 1
+fi
+
+# First parameter must be either 'java' or 'node'.
+if [[ $1 != 'java' && $1 != 'node' ]]; then
+  usage
+  exit 1
+fi
+
+# We only accept one parameter.
+if [[ $# > 1 ]]; then
+  usage
+  exit 1
+fi
+
+unset FLEX_APPS
+project_type=$1
+
+for dir in $(find $directory -maxdepth 1 -type d); do
+  (
+    cd $dir
+  absolute_path=$(pwd)
+  project_dir=$(pwd | rev | cut -d '/' -f1 | rev)
+
+  # Skip if the directory lacks a Dockerfile or a .git directory.
+  if [[  -f Dockerfile && -d ".git" ]]; then
+    #  # Find current project type.
+      current_project_type=$(ggrep -E -o 'distroless/(java|node)' Dockerfile | cut -d '/' -f2)
+      if [[ $current_project_type == $project_type ]]; then
+          echo $project_dir
+      fi
+  fi
+
+  )
+done
+
+
